@@ -18,9 +18,15 @@
     <div class="sidebar">
       <div class="user-header">
         <div class="user-info">
+          {% if user.is_authenticated %}
           <div class="user-avatar">
-            <i class="fas fa-user"></i>
+            <a href="{% url 'chat_home' %}">
+              <i class="fas fa-user"></i>
+            </a>
           </div>
+          {% else %}
+
+          {% endif %}
           <div class="user-name"><a href="{% url 'ver_perfil' username=user.username %}">{{ user.username }}</a></div>
         </div>
         <div>

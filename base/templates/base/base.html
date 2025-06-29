@@ -1,0 +1,161 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WhatsApp Clone</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+</head>
+
+<body>
+  {% if user.is_authenticated %}
+  <div class="app-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="user-header">
+        <div class="user-info">
+          <div class="user-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="user-name"><a href="{% url 'ver_perfil' username=user.username %}">{{ user.username }}</a></div>
+        </div>
+        <div>
+          <a href="{% url 'sair' %}" style="color: #666; text-decoration: none;">
+            <i class="fas fa-sign-out-alt"></i>
+          </a>
+        </div>
+      </div>
+
+      <div class="search-box">
+        <input type="text" placeholder="Pesquisar ou começar uma nova conversa">
+      </div>
+
+      <div class="chat-list">
+        {% for u in users %}
+        {% if u != request.user %}
+        <a href="{% url 'chat' u.username %}" class="chat-item {% if u.username == active_user %}active{% endif %}">
+          <div class="chat-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+          <div class="chat-info">
+            <div class="chat-name">{{ u.username }}</div>
+            <div class="chat-preview">Última mensagem...</div>
+          </div>
+        </a>
+        {% endif %}
+        {% empty %}
+        <div style="padding: 20px; text-align: center; color: #667781;">
+          Nenhum usuário disponível
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Chat Area -->
+    {% block chat_content %}
+    {% if active_user %}
+    <div class="chat-area">
+      <div class="chat-header">
+        <div class="chat-header-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="chat-header-info">
+          <div class="chat-header-name">{{ active_user }}</div>
+        </div>
+      </div>
+
+      <div class="messages-container" id="messages-container">
+        {% for msg in mensagens %}
+        <div class="message {% if msg.sender == request.user %}sent{% else %}received{% endif %}" id="msg-{{ msg.id }}">
+          <div class="message-content">
+            <p>{{ msg.texto }}</p>
+            <span class="message-time">{{ msg.timestamp|date:"H:i" }}</span>
+
+            {% if msg.sender == request.user %}
+            <div class="message-actions">
+              <a href="#" onclick="mostrarEdicao({{ msg.id }}); return false;">✏️</a>
+              <a href="{% url 'apagar_mensagem' msg.id %}" onclick="return confirm('Apagar esta mensagem?');">🗑️</a>
+            </div>
+
+            <form method="post" class="editar-form" id="form-editar-{{ msg.id }}"
+              action="{% url 'editar_mensagem' msg.id %}" style="display: none;">
+              {% csrf_token %}
+              <textarea name="texto" rows="2">{{ msg.texto }}</textarea>
+              <button type="submit">Salvar</button>
+              <button type="button" onclick="cancelarEdicao({{ msg.id }})">Cancelar</button>
+            </form>
+            {% endif %}
+
+          </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; margin-top: 50%; color: #667781;">
+          Nenhuma mensagem trocada ainda
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="chat-input-container">
+        <form method="post" style="flex: 1; display: flex;">
+          {% csrf_token %}
+          <input type="text" name="texto" class="chat-input" placeholder="Digite uma mensagem" required>
+          <button type="submit" class="chat-input-button">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-chat">
+      <div class="empty-chat-icon">
+        <i class="fas fa-comment-dots"></i>
+      </div>
+      <h2 style="color: #41525d; margin-bottom: 10px;">WhatsApp Web</h2>
+      <p style="color: #667781; text-align: center; max-width: 450px; margin-bottom: 20px;">
+        Envie e receba mensagens sem precisar manter seu celular conectado à internet.<br>
+        Use o WhatsApp em até quatro aparelhos conectados e um celular ao mesmo tempo.
+      </p>
+    </div>
+    {% endif %}
+    {% endblock %}
+  </div>
+
+  {% endif %}
+
+  <script>
+    // Rolagem automática para o final das mensagens
+    window.onload = function () {
+      const container = document.getElementById('messages-container');
+      if (container) {
+        container.scrollTop = container.scrollHeight;
+      }
+    };
+
+    // Funções para edição de mensagens
+    function mostrarEdicao(id) {
+      const msgText = document.querySelector(`#msg-${id} .message-content p`);
+      const editForm = document.getElementById(`form-editar-${id}`);
+
+      if (msgText && editForm) {
+        msgText.style.display = 'none';
+        editForm.style.display = 'block';
+      }
+    }
+
+    function cancelarEdicao(id) {
+      const msgText = document.querySelector(`#msg-${id} .message-content p`);
+      const editForm = document.getElementById(`form-editar-${id}`);
+
+      if (msgText && editForm) {
+        msgText.style.display = 'block';
+        editForm.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,18 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+<h2>Usuários</h2>
+<ul>
+  {% for u in users %}
+    {% if u != request.user %}
+      <li><a href="{% url 'chat' u.username %}">{{ u.username }}</a></li>
+    {% endif %}
+  {% endfor %}
+</ul>
+
+{% if not users %}
+  <p>Nenhum usuário encontrado.</p>
+{% endif %}
+
+{% endblock %}

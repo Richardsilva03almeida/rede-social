@@ -1,0 +1,15 @@
+{% extends 'base/base2.html' %}
+
+{% block content %}
+<div class="form-container">
+
+  <h1>Editar Perfil</h1>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Salvar</button>
+  </form>
+  <a href="{% url 'ver_perfil' username=user.username %}">Cancelar</a>
+</div>
+  
+{% endblock %}

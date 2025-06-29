@@ -1,0 +1,87 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+<h2>Chat com {{ outro_usuario.username }}</h2>
+
+<style>
+  .mensagem {
+    position: relative;
+    padding: 8px;
+    margin: 5px 0;
+    border-radius: 8px;
+    background-color: #f0f0f0;
+  }
+  .mensagem.propria {
+    background-color: #dcf8c6;
+    text-align: right;
+  }
+  .acoes {
+    display: none;
+    position: absolute;
+    top: 5px;
+    right: 10px;
+  }
+  .mensagem:hover .acoes {
+    display: block;
+  }
+  .acoes a {
+    margin-left: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    color: #444;
+  }
+  .editar-form {
+    display: none;
+    margin-top: 5px;
+  }
+  .editar-form textarea {
+    width: 100%;
+    resize: vertical;
+  }
+</style>
+
+<div style="border:1px solid #ccc; height:300px; overflow-y:scroll; padding:10px;">
+  {% for msg in mensagens %}
+    <div class="mensagem {% if msg.sender == user %}propria{% endif %}" id="msg-{{ msg.id }}">
+      <strong>{{ msg.sender.username }}:</strong>
+      <span id="texto-{{ msg.id }}">{{ msg.texto }}</span>
+      <small>({{ msg.timestamp|date:"H:i" }})</small>
+
+      {% if msg.sender == user %}
+      <div class="acoes">
+        <a href="#" onclick="mostrarEdicao({{ msg.id }}); return false;">✏️</a>
+        <a href="{% url 'apagar_mensagem' msg.pk %}" onclick="return confirm('Apagar esta mensagem?');">🗑️</a>
+      </div>
+
+      <form method="post" class="editar-form" id="form-editar-{{ msg.id }}" action="{% url 'editar_mensagem' msg.pk %}">
+        {% csrf_token %}
+        <textarea name="texto" rows="3">{{ msg.texto }}</textarea><br>
+        <button type="submit">Salvar</button>
+        <button type="button" onclick="cancelarEdicao({{ msg.id }})">Cancelar</button>
+      </form>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>Nenhuma mensagem ainda.</p>
+  {% endfor %}
+</div>
+
+<form method="post">
+  {% csrf_token %}
+  <textarea name="texto" rows="3" placeholder="Digite sua mensagem..." required></textarea><br>
+  <button type="submit">Enviar</button>
+</form>
+
+<script>
+  function mostrarEdicao(id) {
+    document.getElementById('texto-' + id).style.display = 'none';
+    document.getElementById('form-editar-' + id).style.display = 'block';
+  }
+  function cancelarEdicao(id) {
+    document.getElementById('form-editar-' + id).style.display = 'none';
+    document.getElementById('texto-' + id).style.display = 'inline';
+  }
+</script>
+
+{% endblock %}

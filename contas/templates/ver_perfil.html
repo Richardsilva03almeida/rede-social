@@ -1,0 +1,48 @@
+{% extends 'base/base2.html' %}
+
+{% block content %}
+<div class="form-container">
+  
+  <h1>Perfil de {{ perfil.user.username }}</h1>
+  
+  {% if perfil.foto %}
+  <img src="{{ perfil.foto.url }}" alt="Foto de perfil" style="max-width: 200px;">
+  {% else %}
+  <p>Sem foto</p>
+  {% endif %}
+  
+  <p><strong>Nome:</strong> {{ perfil.user.username }}</p>
+  <p><strong>Email:</strong> {{ perfil.user.email }}</p>
+  <p><strong>Número:</strong> {{ perfil.numero }}</p>
+  <p><strong>Curso:</strong> {{ perfil.curso }}</p>
+  <p><strong>Tipo de usuário:</strong> {{ perfil.get_tipo_usuario_display }}</p>
+  
+  
+  <!-- chat -->
+  {% if perfil.user != request.user %}
+  {% if user.is_authenticated %}
+  <p>
+    <a href="{% url 'chat' perfil.user.username %}">Conversar</a>
+  </p>
+  {% else %}
+  <p><a href="{% url 'entrar' %}">Faça login</a> para iniciar uma conversa.</p>
+  {% endif %}
+  {% else %}
+  <p>Este é o seu próprio perfil.</p>
+  {% endif %}
+  <!-- chat -->
+  
+  
+  <div class="box-post">
+    
+    {% if perfil.user == user %}
+    <a href="{% url 'editar_perfil' %}" class="btn">Editar meu perfil</a>
+    <a href="{% url 'deletar_conta' %}" class="btn">Deletar Conta</a>
+    <a href="{% url 'sobre' %}" class="btn">Sobre</a>
+    <a href="{% url 'sair' %}" class="btn">Sair</a>
+    {% endif %}
+    
+  </div>
+  
+</div>
+  {% endblock %}
